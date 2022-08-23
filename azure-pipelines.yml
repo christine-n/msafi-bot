@@ -17,3 +17,17 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+  
+- task: PowerShell@2
+  inputs:
+    script: |
+      $systemAccessToken = $env:SYSTEM_ACCESSTOKEN
+      $projectBaseUrl = $env:PROJECT_BASE_URL
+      
+      $uri = "$($projectBaseUrl)/_apis/build/builds/$(Build.BuildId)?api-version=7.1-preview.7"
+      $headers = @{"Authorization" = "Bearer $systemAccessToken"}
+      Write-Output "Get info from last queued run"
+      $response = Invoke-WebRequest -Uri $uri -Headers $headers -Method GET
+      $lastBuild = $response.Content | ConvertFrom-Json
+      Write-Output "Result:"
+      Write-Output $lastBuild.value
